@@ -23,7 +23,7 @@ jobs:
         with:
           go-version: stable
       - run: go install github.com/AkihiroSuda/gosocialcheck/cmd/gosocialcheck@v0.1.0
-      - run: gosocialcheck update
+      - run: gosocialcheck --cache-mode=local update
       - run: cp -a ~/.cache/gosocialcheck/_local/github.com .
       - name: Open a pull request
         run: |
