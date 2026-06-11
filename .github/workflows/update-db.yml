@@ -32,14 +32,16 @@ jobs:
             echo "No changes"
             exit 0
           fi
+          if [ -n "$(gh pr list --head automated/update --state open --json number --jq '.[].number')" ]; then
+            echo "Pull request already exists"
+            exit 0
+          fi
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
           git checkout -B automated/update
           git add github.com
           git commit -s -m 'Update the cache'
           git push -f origin automated/update
-          if [ -z "$(gh pr list --head automated/update --state open --json number --jq '.[].number')" ]; then
-            gh pr create --base master --head automated/update \
-              --title 'Update the cache' \
-              --body 'Automatically committed by the "Update the cache" workflow.'
-          fi
+          gh pr create --base master --head automated/update \
+            --title 'Update the cache' \
+            --body 'Automatically committed by the "Update the cache" workflow.'
