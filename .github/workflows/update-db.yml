@@ -1,0 +1,45 @@
+name: Update the cache
+# This workflow never commits to the master branch directly:
+# it pushes the "automated/update" branch and opens a pull request.
+on:
+  schedule:
+    - cron: '30 5 * * 1'  # Mondays
+  workflow_dispatch:
+permissions:
+  contents: write  # used to push
+  pull-requests: write  # used to open the pull request
+jobs:
+  update:
+    if: github.repository == 'AkihiroSuda/gosocialcheck-cache'
+    env:
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10  # v6.0.3
+        with:
+          persist-credentials: true  # needed to push
+      - uses: actions/setup-go@4a3601121dd01d1626a1e23e37211e3254c1c06c  # v6.4.0
+        with:
+          go-version: stable
+      - run: go install github.com/AkihiroSuda/gosocialcheck/cmd/gosocialcheck@v0.0.5
+      - run: gosocialcheck update
+      - run: cp -a ~/.cache/gosocialcheck/github.com .
+      - name: Open a pull request
+        run: |
+          set -eux
+          if [ -z "$(git status --porcelain github.com)" ]; then
+            echo "No changes"
+            exit 0
+          fi
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git checkout -B automated/update
+          git add github.com
+          git commit -s -m 'Update the cache'
+          git push -f origin automated/update
+          if [ -z "$(gh pr list --head automated/update --state open --json number --jq '.[].number')" ]; then
+            gh pr create --base master --head automated/update \
+              --title 'Update the cache' \
+              --body 'Automatically committed by the "Update the cache" workflow.'
+          fi
