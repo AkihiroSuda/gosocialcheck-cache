@@ -1,1 +1,1 @@
-{"repo":{"owner":"istio","repo":"istio"},"tag":{"name":"1.31.0-rc.4","commit":{"sha":"eed52ebb66ade45214088877b0f82855d954060d"}},"category":"cncf.io::graduated"}
+{"repo":{"owner":"istio","repo":"istio"},"tag":{"name":"1.31.0","commit":{"sha":"eed52ebb66ade45214088877b0f82855d954060d"}},"category":"cncf.io::graduated"}
